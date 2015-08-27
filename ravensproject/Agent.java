@@ -1,9 +1,9 @@
 package ravensproject;
 
 // Uncomment these lines to access image processing.
-//import java.awt.Image;
-//import java.io.File;
-//import javax.imageio.ImageIO;
+import java.awt.Image;
+import java.io.File;
+import javax.imageio.ImageIO;
 
 /**
  * Your Agent for solving Raven's Progressive Matrices. You MUST modify this

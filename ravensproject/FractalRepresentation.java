@@ -2,8 +2,8 @@ package ravensproject;
 
 public class FractalRepresentation {
 
-	Pair<Double, Double> sourceFragmentOrigin;
-	Pair<Double, Double> destinationFragmentOrigin;
+	Pair<Integer, Integer> sourceFragmentOrigin;
+	Pair<Integer, Integer> destinationFragmentOrigin;
 	// The affine transformation used to rotate, flip, or reflect the pixels
 	String orthonormalTransformation;
 	// The width and height of the region in pixels
@@ -12,19 +12,19 @@ public class FractalRepresentation {
 	// and destination blocks
 	Double colorimetricContraction;
 
-	public Pair<Double, Double> getSourceFragmentOrigin() {
+	public Pair<Integer, Integer> getSourceFragmentOrigin() {
 		return sourceFragmentOrigin;
 	}
 
-	public void setSourceFragmentOrigin(Pair<Double, Double> sourceFragmentOrigin) {
+	public void setSourceFragmentOrigin(Pair<Integer, Integer> sourceFragmentOrigin) {
 		this.sourceFragmentOrigin = sourceFragmentOrigin;
 	}
 
-	public Pair<Double, Double> getDestinationFragmentOrigin() {
+	public Pair<Integer, Integer> getDestinationFragmentOrigin() {
 		return destinationFragmentOrigin;
 	}
 
-	public void setDestinationFragmentOrigin(Pair<Double, Double> destinationFragmentOrigin) {
+	public void setDestinationFragmentOrigin(Pair<Integer, Integer> destinationFragmentOrigin) {
 		this.destinationFragmentOrigin = destinationFragmentOrigin;
 	}
 

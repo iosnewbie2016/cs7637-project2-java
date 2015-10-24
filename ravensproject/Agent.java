@@ -4,17 +4,13 @@ package ravensproject;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import javax.imageio.ImageIO;
 
@@ -68,68 +64,182 @@ public class Agent {
    * @return your Agent's answer to this problem
    */
   public int Solve(RavensProblem problem) {
-    if (problem.getName().equals("Basic Problem B-03")) {
-      BufferedImage a = null;
-      BufferedImage b = null;
+    if (problem.getName().equals("Basic Problem C-01")) {
+      if (problem.getProblemType().equals("2x2"))
+        return executeFractalAlgorithmTwoByTwo(problem);
+      else
+        return executeFractalAlgorithmThreeByThree(problem);
+    }
 
-      // Open image
-      try {
-        a = ImageIO.read(new File(problem.getFigures().get("A").getVisual()));
-        b = ImageIO.read(new File(problem.getFigures().get("B").getVisual()));
-      } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
+    return -1;
+  }
 
-      List<BufferedImage> images = new ArrayList<>();
+  public int executeFractalAlgorithmTwoByTwo(RavensProblem problem) {
+    // Figure name as key and similarity score as value
+    Map<String, Double> similarities = new HashMap<>();
+    // Relationship sets
+    Set<FractalRepresentation> horizontalRelations = new HashSet<>();
+    Set<FractalRepresentation> verticalRelations = new HashSet<>();
 
-      // Rotate 90 degrees
-      BufferedImage newImage = rotateImage(a, Math.PI / 2);
-      images.add(newImage);
-      // Rotate 180 degrees
-      newImage = rotateImage(a, Math.PI);
-      images.add(newImage);
-      // Rotate 270 degrees
-      newImage = rotateImage(a, 3 * Math.PI / 2);
-      images.add(newImage);
-      // Horizontal flip
-      newImage = horizontalFlip(a);
-      images.add(newImage);
-      // Vertical flip
-      newImage = verticalFlip(a);
-      images.add(newImage);
-      // reflect ynx
-      newImage = reflectYNX(a);
-      images.add(newImage);
-      // reflect yx
-      newImage = reflectYX(a);
-      images.add(newImage);
+    // Get horizontal relationships
+    horizontalRelations.addAll(
+        getMutualFractalsTwoByTwo(
+            openImage(problem.getFigures().get("A").getVisual()),
+            openImage(problem.getFigures().get("B").getVisual())
+        )
+    );
+    // Get vertical relationships
+    verticalRelations.addAll(
+        getMutualFractalsTwoByTwo(
+            openImage(problem.getFigures().get("A").getVisual()),
+            openImage(problem.getFigures().get("C").getVisual())
+        )
+    );
 
-      for (int i = 0; i < images.size(); i++) {
-        // Save image
-        try {
-          ImageIO.write(images.get(i), "png", new File("newImage" + i + ".png"));
-        } catch (IOException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-        }
+    for (Map.Entry<String, RavensFigure> figure : problem.getFigures().entrySet()) {
+      if (Character.isDigit(figure.getKey().charAt(0))) {
+        // Answer relationship sets
+        Set<FractalRepresentation> answerHorizontal = new HashSet<>();
+        Set<FractalRepresentation> answerVertical = new HashSet<>();
+        // Similarity vector
+        double[] vector = new double[2];
+
+        // Get horizontal relationships
+        answerHorizontal.addAll(
+            getMutualFractalsTwoByTwo(
+                openImage(problem.getFigures().get("C").getVisual()),
+                openImage(problem.getFigures().get(figure.getKey()).getVisual())
+            )
+        );
+        // Get vertical relationships
+        answerVertical.addAll(
+            getMutualFractalsTwoByTwo(
+                openImage(problem.getFigures().get("B").getVisual()),
+                openImage(problem.getFigures().get(figure.getKey()).getVisual())
+            )
+        );
+
+        vector[0] = calculateSimilarity(horizontalRelations, answerHorizontal);
+        vector[1] = calculateSimilarity(verticalRelations, answerVertical);
+
+        similarities.put(figure.getKey(), calculateEuclideanDistance(vector));
       }
     }
 
-//    	Set<FractalRepresentation> fractals = getFractals(a, b);
-//    	
-//    	int count = 1;
-//    	for (FractalRepresentation fractal : fractals) {
-//    		System.out.println("/**** Fractal " + count + " ****/");
-//    		System.out.println(fractal.getSourceFragmentOrigin());
-//    		System.out.println(fractal.getDestinationFragmentOrigin());
-//    		System.out.println(fractal.getOrthonormalTransformation());
-//    		System.out.println(fractal.getRegionSize());
-//    		System.out.println(fractal.getColorimetricOperation());
-//    		System.out.println(fractal.getColorimetricContraction());
-//    	}
+    // Find the answer with the highest similarity value
+    Map.Entry<String, Double> bestAnswer = null;
+    for (Map.Entry<String, Double> entry : similarities.entrySet()) {
+      if (bestAnswer == null || bestAnswer.getValue() < entry.getValue()) {
+        bestAnswer = entry;
+      }
+    }
 
-    return -1;
+    return Integer.valueOf(bestAnswer.getKey());
+  }
+
+  public int executeFractalAlgorithmThreeByThree(RavensProblem problem) {
+    // Figure name as key and similarity score as value
+    Map<String, Double> similarities = new HashMap<>();
+    // Relationship sets
+    Set<FractalRepresentation> horizontalRelations1 = new HashSet<>();
+    Set<FractalRepresentation> horizontalRelations2 = new HashSet<>();
+    Set<FractalRepresentation> verticalRelations1 = new HashSet<>();
+    Set<FractalRepresentation> verticalRelations2 = new HashSet<>();
+
+    // Get horizontal relationships
+    horizontalRelations1.addAll(
+        getMutualFractalsThreeByThree(
+            openImage(problem.getFigures().get("A").getVisual()),
+            openImage(problem.getFigures().get("B").getVisual()),
+            openImage(problem.getFigures().get("C").getVisual())
+        )
+    );
+    horizontalRelations2.addAll(
+        getMutualFractalsThreeByThree(
+            openImage(problem.getFigures().get("D").getVisual()),
+            openImage(problem.getFigures().get("E").getVisual()),
+            openImage(problem.getFigures().get("F").getVisual())
+        )
+    );
+    // Get vertical relationships
+    verticalRelations1.addAll(
+        getMutualFractalsThreeByThree(
+            openImage(problem.getFigures().get("A").getVisual()),
+            openImage(problem.getFigures().get("D").getVisual()),
+            openImage(problem.getFigures().get("G").getVisual())
+        )
+    );
+    verticalRelations2.addAll(
+        getMutualFractalsThreeByThree(
+            openImage(problem.getFigures().get("B").getVisual()),
+            openImage(problem.getFigures().get("E").getVisual()),
+            openImage(problem.getFigures().get("H").getVisual())
+        )
+    );
+
+    for (Map.Entry<String, RavensFigure> figure : problem.getFigures().entrySet()) {
+      if (Character.isDigit(figure.getKey().charAt(0))) {
+        // Answer relationship sets
+        Set<FractalRepresentation> answerHorizontal = new HashSet<>();
+        Set<FractalRepresentation> answerVertical = new HashSet<>();
+        // Similarity vector
+        double[] vector = new double[4];
+
+        // Get horizontal relationships
+        answerHorizontal.addAll(
+            getMutualFractalsThreeByThree(
+                openImage(problem.getFigures().get("G").getVisual()),
+                openImage(problem.getFigures().get("H").getVisual()),
+                openImage(problem.getFigures().get(figure.getKey()).getVisual())
+            )
+        );
+        // Get vertical relationships
+        answerVertical.addAll(
+            getMutualFractalsThreeByThree(
+                openImage(problem.getFigures().get("C").getVisual()),
+                openImage(problem.getFigures().get("F").getVisual()),
+                openImage(problem.getFigures().get(figure.getKey()).getVisual())
+            )
+        );
+
+        vector[0] = calculateSimilarity(horizontalRelations1, answerHorizontal);
+        vector[1] = calculateSimilarity(horizontalRelations2, answerHorizontal);
+        vector[2] = calculateSimilarity(verticalRelations1, answerVertical);
+        vector[3] = calculateSimilarity(verticalRelations2, answerVertical);
+
+        similarities.put(figure.getKey(), calculateEuclideanDistance(vector));
+      }
+    }
+
+    // Find the answer with the highest similarity value
+    Map.Entry<String, Double> bestAnswer = null;
+    for (Map.Entry<String, Double> entry : similarities.entrySet()) {
+      if (bestAnswer == null || bestAnswer.getValue() < entry.getValue()) {
+        bestAnswer = entry;
+      }
+    }
+
+    return Integer.valueOf(bestAnswer.getKey());
+  }
+
+  public Set<FractalRepresentation> getMutualFractalsTwoByTwo(BufferedImage image1, BufferedImage image2) {
+    Set<FractalRepresentation> fractals = new HashSet<>();
+
+    fractals.addAll(getFractals(image1, image2));
+    fractals.addAll(getFractals(image2, image1));
+
+    return fractals;
+  }
+
+  public Set<FractalRepresentation> getMutualFractalsThreeByThree(BufferedImage image1, BufferedImage image2, BufferedImage image3) {
+    Set<FractalRepresentation> fractals = new HashSet<>();
+
+    fractals.addAll(getFractals(image1, image2));
+    fractals.addAll(getFractals(image2, image3));
+    fractals.addAll(getFractals(image1, image3));
+
+
+    return fractals;
   }
 
   public Set<FractalRepresentation> getFractals(BufferedImage source, BufferedImage destination) {
@@ -137,25 +247,81 @@ public class Agent {
 
     // Partition images into a grid of image fragments
     BufferedImage[][] sourceFragments = partitionImage(source);
-    BufferedImage[][] destinationFragments = partitionImage(source);
+    BufferedImage[][] destinationFragments = partitionImage(destination);
+    // Transformation name as key and transformed image as value
+    Map<String, BufferedImage> transformations = new LinkedHashMap<>();
+    // Transformation name as key and correspondence score as value
+    Map<String, Double> transformCorrespondences = new LinkedHashMap<>();
+    // Fragment location as key and transformation as value
+    Map<Pair<Integer, Integer>, String> fragmentTransformations = new LinkedHashMap<>();
+    // Fragment location as key and correspondence score as value
+    Map<Pair<Integer, Integer>, Double> fragmentCorrespondences = new LinkedHashMap<>();
 
     // Iterate through destination image fragments
     for (int i = 0; i < destinationFragments.length; i++) {
-      for (int j = 0; j < destinationFragments.length; i++) {
+      for (int j = 0; j < destinationFragments.length; j++) {
         // Iterate through source image fragments
         for (int x = 0; x < sourceFragments.length; x++) {
           for (int y = 0; y < sourceFragments.length; y++) {
-            // Search source for equivalent sub-image to destination sub-image such that an affine transformation
-            // of source sub-image will result in destination sub-image
-            // TODO
+            // Get each affine transformation for the source image fragment
+            // Identity
+            transformations.put("identity", sourceFragments[x][y]);
+            // Horizontal flip
+            transformations.put("hFlip", horizontalFlip(sourceFragments[x][y]));
+            // Vertical flip
+            transformations.put("vFlip", verticalFlip(sourceFragments[x][y]));
+            // Rotate 90 degrees
+            transformations.put("r90", rotateImage(sourceFragments[x][y], Math.PI / 2));
+            // Rotate 180 degrees
+            transformations.put("r180", rotateImage(sourceFragments[x][y], Math.PI));
+            // Rotate 270 degrees
+            transformations.put("r270", rotateImage(sourceFragments[x][y], 3 * Math.PI / 2));
+            // Reflect ynx
+            transformations.put("reflYNX", reflectYNX(sourceFragments[x][y]));
+            // Reflect yx
+            transformations.put("reflYX", reflectYX(sourceFragments[x][y]));
 
-            // Let the transformation be the representation of the chosen transformation associated with
-            // destination sub-image
+            // Get the correspondence value for each transformation
+            for (Map.Entry<String, BufferedImage> transformation : transformations.entrySet()) {
+              transformCorrespondences.put(
+                  transformation.getKey(),
+                  getCorrespondence(transformation.getValue(), destinationFragments[i][j], new Pair<>(x, y), new Pair<>(i, j))
+              );
+            }
+
+            // Find the transformation with the lowest correspondence value
+            Map.Entry<String, Double> minimumTransform = null;
+            for (Map.Entry<String, Double> entry : transformCorrespondences.entrySet()) {
+              if (minimumTransform == null || minimumTransform.getValue() > entry.getValue()) {
+                minimumTransform = entry;
+              }
+            }
+
+            // Store the fragment with its transformation and correspondence value
+            fragmentTransformations.put(new Pair<>(x, y), minimumTransform.getKey());
+            fragmentCorrespondences.put(new Pair<>(x, y), minimumTransform.getValue());
+          }
+        }
+
+        // Get the fragment with the lowest correspondence value
+        Map.Entry<Pair<Integer, Integer>, Double> correspondingFragment = null;
+        for (Map.Entry<Pair<Integer, Integer>, Double> entry : fragmentCorrespondences.entrySet()) {
+          if (correspondingFragment == null || correspondingFragment.getValue() > entry.getValue()) {
+            correspondingFragment = entry;
           }
         }
 
         // Create the Fractal Representation from the fractal codes
-        FractalRepresentation fractal = new FractalRepresentation();
+        FractalRepresentation fractal = new FractalRepresentation(
+            correspondingFragment.getKey(),
+            new Pair<>(i, j),
+            fragmentTransformations.get(correspondingFragment.getKey()),
+            destination.getHeight(),
+            getColorContraction(
+                sourceFragments[correspondingFragment.getKey().getElement0()][correspondingFragment.getKey().getElement1()],
+                destinationFragments[i][j]
+            )
+        );
 
         // Store fractal representation
         fractals.add(fractal);
@@ -165,10 +331,90 @@ public class Agent {
     return fractals;
   }
 
+  public Set<String> getFractalFeatures(FractalRepresentation fractal) {
+    Set<String> features = new HashSet<>();
+
+    features.add("S" + fractal.getSourceFragmentOrigin().toString());
+    features.add("D" + fractal.getDestinationFragmentOrigin().toString());
+    features.add("T" + fractal.getOrthonormalTransformation());
+    features.add("R" + fractal.getRegionSize());
+    features.add("C" + fractal.getColorimetricContraction());
+
+    return features;
+  }
+
+  // TODO is this needed?
+  public Map<Integer, FractalRepresentation> indexFractals(Set<FractalRepresentation> fractals) {
+    Map<Integer, FractalRepresentation> indexedFractals = new Hashtable<>();
+
+    for (FractalRepresentation fractal : fractals) {
+      // Generate the set of features for the fractal representation
+      Set<String> features = getFractalFeatures(fractal);
+      // Index the fractal representation using the feature
+      for (String feature : features) {
+        indexedFractals.put(feature.hashCode(), fractal);
+      }
+    }
+
+    return indexedFractals;
+  }
+
+  // TODO is this still needed?
+  public double calculateFractalSimilarity(FractalRepresentation fractal1, FractalRepresentation fractal2) {
+    Set<String> f1Features = getFractalFeatures(fractal1);
+    Set<String> f2Features = getFractalFeatures(fractal2);
+    Set<String> set1 = new HashSet<>();
+    Set<String> set2 = new HashSet<>();
+    Set<String> set3 = new HashSet<>();
+    double alpha = 2.0;
+    double beta = 1.0;
+
+    set1.addAll(f1Features);
+    set1.retainAll(f2Features);
+
+    set2.addAll(f1Features);
+    set2.removeAll(f2Features);
+
+    set3.addAll(f2Features);
+    set3.removeAll(f1Features);
+
+    return set1.size() / (set1.size() + alpha * set2.size() + beta * set3.size());
+  }
+
+  public double calculateSimilarity(Set<FractalRepresentation> fractalSet1, Set<FractalRepresentation> fractalSet2) {
+    Set<String> fractalSet1Features = new HashSet<>();
+    Set<String> fractalSet2Features = new HashSet<>();
+    Set<String> set1 = new HashSet<>();
+    Set<String> set2 = new HashSet<>();
+    Set<String> set3 = new HashSet<>();
+    double alpha = 2.0;
+    double beta = 1.0;
+
+    // Generate set of features for fractals in first set
+    for (FractalRepresentation fractal : fractalSet1) {
+      fractalSet1Features.addAll(getFractalFeatures(fractal));
+    }
+
+    // Generate set of features for fractals in second set
+    for (FractalRepresentation fractal : fractalSet2) {
+      fractalSet2Features.addAll(getFractalFeatures(fractal));
+    }
+
+    set1.addAll(fractalSet1Features);
+    set1.retainAll(fractalSet2Features);
+
+    set2.addAll(fractalSet1Features);
+    set2.removeAll(fractalSet2Features);
+
+    set3.addAll(fractalSet2Features);
+    set3.removeAll(fractalSet1Features);
+
+    return set1.size() / (set1.size() + alpha * set2.size() + beta * set3.size());
+  }
+
   public BufferedImage[][] partitionImage(BufferedImage image) {
-    int rows = 4;
-    int columns = 4;
-    int fragments = rows * columns;
+    int rows = 8;
+    int columns = 8;
 
     // Determine the fragment width and height
     int fragmentWidth = image.getWidth() / columns;
@@ -181,7 +427,7 @@ public class Agent {
         images[x][y] = new BufferedImage(fragmentWidth, fragmentHeight, image.getType());
 
         // Draw the image fragment
-        Graphics2D graphic = images[x++][y++].createGraphics();
+        Graphics2D graphic = images[x][y].createGraphics();
         graphic.drawImage(image, 0, 0, fragmentWidth, fragmentHeight, fragmentWidth * y, fragmentHeight * x,
             fragmentWidth * y + fragmentWidth, fragmentHeight * x + fragmentHeight, null
         );
@@ -197,39 +443,30 @@ public class Agent {
   }
 
   public int getColorMean(BufferedImage image) {
-    long sumr = 0, sumg = 0, sumb = 0;
-    int size = image.getWidth() * image.getHeight();
+    long totalRed = 0;
+    long totalGreen = 0;
+    long totalBlue = 0;
+    int pixels = image.getWidth() * image.getHeight();
 
     for (int x = 0; x < image.getWidth(); x++) {
       for (int y = 0; y < image.getHeight(); y++) {
         Color pixel = new Color(image.getRGB(x, y));
-        sumr += pixel.getRed();
-        sumg += pixel.getGreen();
-        sumb += pixel.getBlue();
+        totalRed += pixel.getRed();
+        totalGreen += pixel.getGreen();
+        totalBlue += pixel.getBlue();
       }
     }
 
-    return new Color(sumr / size, sumg / size, sumb / size).getRGB();
-  }
+    // Scale the colors from 0-255 to 0.0-1.0
+    float red = (totalRed / pixels) / 255f;
+    float green = (totalGreen / pixels) / 255f;
+    float blue = (totalBlue / pixels) / 255f;
 
-  public BufferedImage getBestTransformation(BufferedImage a, BufferedImage b,
-                                               Pair<Integer, Integer> aFragmentOrigin, Pair<Integer, Integer> bFragmentOrigin) {
-    double correspondence = Double.POSITIVE_INFINITY;
-
-    // Identity
-    // Horizontal flip
-    // Vertical flip
-    // Rotate 90 degrees
-    // Rotate 180 degrees
-    // Rotate 270 degrees
-    // Reflect ynx
-    // Reflect yx
-
-    return null;
+    return new Color(red, green, blue).getRGB();
   }
 
   public double getCorrespondence(BufferedImage a, BufferedImage b,
-      Pair<Integer, Integer> aFragmentOrigin, Pair<Integer, Integer> bFragmentOrigin) {
+                                  Pair<Integer, Integer> aFragmentOrigin, Pair<Integer, Integer> bFragmentOrigin) {
     return 1 * getPhotometricCorrespondence(a, b) + 0.3 * getDistance(aFragmentOrigin, bFragmentOrigin);
   }
 
@@ -263,6 +500,7 @@ public class Agent {
     );
   }
 
+  // TODO Cite from internet
   public BufferedImage horizontalFlip(BufferedImage image) {
     BufferedImage result = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
 
@@ -274,6 +512,7 @@ public class Agent {
     return result;
   }
 
+  // TODO Cite from internet
   public BufferedImage verticalFlip(BufferedImage image) {
     BufferedImage result = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
 
@@ -287,7 +526,7 @@ public class Agent {
 
   /**
    * This method rotates an image about its center. Theta is a radian value:
-   * <p/>
+   *
    * 90 degrees = pi / 2
    * 180 degrees = pi
    * 270 degrees = 3 * pi / 2
@@ -298,7 +537,7 @@ public class Agent {
    */
   public BufferedImage rotateImage(BufferedImage image, double theta) {
     BufferedImage result = new BufferedImage(image.getHeight(), image.getWidth(), image.getType());
-		
+
 		/* Transformations are stacked then applied so the last transformation is the first to happen */
     AffineTransform tx = new AffineTransform();
 
@@ -334,6 +573,7 @@ public class Agent {
     return result;
   }
 
+  // TODO Cite from internet
   private static int[][] getPixelMatrix(BufferedImage image) {
     final byte[] pixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
     final int width = image.getWidth();
@@ -356,7 +596,8 @@ public class Agent {
           row++;
         }
       }
-    } else {
+    }
+    else {
       final int pixelLength = 3;
       for (int pixel = 0, row = 0, col = 0; pixel < pixels.length; pixel += pixelLength) {
         int argb = 0;
@@ -374,5 +615,49 @@ public class Agent {
     }
 
     return result;
+  }
+
+  public BufferedImage openImage(String path) {
+    // Open image
+    try {
+      return ImageIO.read(new File(path));
+    }
+    catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+
+    return null;
+  }
+
+  public BufferedImage openImageAsGrayScale(String path) {
+    BufferedImage image;
+
+    // Open image
+    image = openImage(path);
+    // Convert to grayscale
+    image = getGrayScale(image);
+
+    return image;
+  }
+
+  public BufferedImage getGrayScale(BufferedImage image) {
+    BufferedImage grayScale = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
+    Graphics2D graphic = grayScale.createGraphics();
+
+    graphic.drawImage(image, 0, 0, null);
+    graphic.dispose();
+
+    return grayScale;
+  }
+
+  public double calculateEuclideanDistance(double[] vector) {
+    double sum = 0;
+
+    for (int i = 0; i < vector.length; i++) {
+      sum += Math.pow(vector[i], 2);
+    }
+
+    return Math.sqrt(sum);
   }
 }

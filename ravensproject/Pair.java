@@ -73,11 +73,11 @@ public class Pair<K, V> {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		
-		builder.append("Pair [element0=");
+		builder.append("(");
 		builder.append(element0);
-		builder.append(", element1=");
+		builder.append(", ");
 		builder.append(element1);
-		builder.append("]");
+		builder.append(")");
 		
 		return builder.toString();
 	}

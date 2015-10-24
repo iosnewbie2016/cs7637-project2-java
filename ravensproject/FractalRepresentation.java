@@ -12,6 +12,15 @@ public class FractalRepresentation {
 	// and destination blocks
 	Double colorimetricContraction;
 
+	public FractalRepresentation(Pair<Integer, Integer> sourceFragmentOrigin, Pair<Integer, Integer> destinationFragmentOrigin,
+															 String orthonormalTransformation, Integer regionSize, Double colorimetricContraction) {
+		this.sourceFragmentOrigin = sourceFragmentOrigin;
+		this.destinationFragmentOrigin = destinationFragmentOrigin;
+		this.orthonormalTransformation = orthonormalTransformation;
+		this.regionSize = regionSize;
+		this.colorimetricContraction = colorimetricContraction;
+	}
+
 	public Pair<Integer, Integer> getSourceFragmentOrigin() {
 		return sourceFragmentOrigin;
 	}

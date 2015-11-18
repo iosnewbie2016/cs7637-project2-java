@@ -1,6 +1,11 @@
 package ravensproject;
 
 /*
+ * This class implements a pair of objects. Credit to Baptiste for the original
+ * code:
+ *
+ * http://stackoverflow.com/questions/5303539/didnt-java-once-have-a-pair-class
+ *
  * Usage:
  * Pair<Integer, String> pair = Pair.createPair(1, "test");
  * pair.getElement0();

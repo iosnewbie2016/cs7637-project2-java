@@ -63,15 +63,14 @@ public class Agent {
    * @param problem the RavensProblem your agent should solve
    * @return your Agent's answer to this problem
    */
-  public int[] abstractionLevels = {1, 4};
+  public int[] abstractionLevels = {2};
 
   public int Solve(RavensProblem problem) {
-    if (problem.getProblemType().equals("2x2")) {
-      // Skip problem set B
-      return -1;
+    if (problem.getProblemType().equals("3x3")) {
+      return executeFractalAlgorithmThreeByThree(problem);
     }
     else {
-      return executeFractalAlgorithmThreeByThree(problem);
+      return executeFractalAlgorithmTwoByTwo(problem);
     }
   }
 
@@ -148,16 +147,19 @@ public class Agent {
       }
 
       // Find the answer with the highest similarity value
-      Double maxSimilarity = null;
+      Map.Entry<Integer, Double> bestAnswer = null;
       for (Map.Entry<Integer, Double> entry : similarities.entrySet()) {
-        if (maxSimilarity == null || maxSimilarity < entry.getValue()) {
-          maxSimilarity = entry.getValue();
+        if (bestAnswer == null || bestAnswer.getValue() < entry.getValue()) {
+          bestAnswer = entry;
         }
       }
 
+      // Return most confident answer
+      answer = bestAnswer.getKey();
+
       // Normalize data for a range of 0.0-1.0
       for (Map.Entry<Integer, Double> entry : similarities.entrySet()) {
-        entry.setValue(entry.getValue() / maxSimilarity);
+        entry.setValue(entry.getValue() / bestAnswer.getValue());
       }
 
       // Calculate mean
@@ -177,12 +179,16 @@ public class Agent {
           answers.add(deviation.getKey());
       }
 
-      if (answers.size() == 1)
-        answer = answers.get(0);
+//      if (answers.size() == 1)
+//        answer = answers.get(0);
 
       // Move to next level of abstraction
       abstraction++;
     }
+
+    // Print out answer to problem
+    System.out.println(problem.getName());
+    System.out.println(answer);
 
     return answer;
   }
@@ -284,16 +290,19 @@ public class Agent {
       }
 
       // Find the answer with the highest similarity value
-      Double maxSimilarity = null;
+      Map.Entry<Integer, Double> bestAnswer = null;
       for (Map.Entry<Integer, Double> entry : similarities.entrySet()) {
-        if (maxSimilarity == null || maxSimilarity < entry.getValue()) {
-          maxSimilarity = entry.getValue();
+        if (bestAnswer == null || bestAnswer.getValue() < entry.getValue()) {
+          bestAnswer = entry;
         }
       }
 
+      // Return most confident answer
+      answer = bestAnswer.getKey();
+
       // Normalize data for a range of 0.0-1.0
       for (Map.Entry<Integer, Double> entry : similarities.entrySet()) {
-        entry.setValue(entry.getValue() / maxSimilarity);
+        entry.setValue(entry.getValue() / bestAnswer.getValue());
       }
 
       // Calculate mean
@@ -313,12 +322,17 @@ public class Agent {
           answers.add(deviation.getKey());
       }
 
-      if (answers.size() == 1)
-        answer = answers.get(0);
+      // TODO need to increase efficiency of program before implementing multiple abstraction levels
+//      if (answers.size() == 1)
+//        answer = answers.get(0);
 
       // Move to next level of abstraction
       abstraction++;
     }
+
+    // Print out answer to problem
+    System.out.println(problem.getName());
+    System.out.println(answer);
 
     return answer;
   }

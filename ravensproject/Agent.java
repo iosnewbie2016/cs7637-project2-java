@@ -730,8 +730,8 @@ public class Agent {
   }
 
   /**
-   * This method reflects an image over the y-axis and then rotates the
-   * image 270 degrees.
+   * This method rotates an image 90 degrees then reflects the image over the
+   * x axis.
    *
    * @param image
    * @return
@@ -739,17 +739,17 @@ public class Agent {
   public BufferedImage reflectYNX(BufferedImage image) {
     BufferedImage result = null;
 
-    // Reflect image over y axis
-    result = horizontalFlip(image);
-    // Rotate 270 degrees
-    result = rotateImage(result, 3 * Math.PI / 2);
+	// Rotate 90 degrees
+    result = rotateImage(result, Math.PI / 2);
+    // Reflect image over x axis
+    result = verticalFlip(image);
 
     return result;
   }
 
   /**
-   * This method reflects an image over the x-axis and then rotates the
-   * image 270 degrees.
+   * This method rotates an image 270 degrees then reflects the image over the
+   * x axis.
    *
    * @param image
    * @return
@@ -757,10 +757,10 @@ public class Agent {
   public BufferedImage reflectYX(BufferedImage image) {
     BufferedImage result = null;
 
+	// Rotate 270 degrees
+    result = rotateImage(result, 3 * Math.PI / 2);
     // Reflect image over x axis
     result = verticalFlip(image);
-    // Rotate 270 degrees
-    result = rotateImage(result, 3 * Math.PI / 2);
 
     return result;
   }

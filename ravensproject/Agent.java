@@ -242,42 +242,6 @@ public class Agent {
       Set<FractalRepresentation> horizontalRelations2 = new HashSet<>();
       Set<FractalRepresentation> verticalRelations1 = new HashSet<>();
       Set<FractalRepresentation> verticalRelations2 = new HashSet<>();
-
-      // TODO remove when parallelism working
-//      // Get horizontal relationships
-//      horizontalRelations1.addAll(
-//          getMutualFractalsThreeByThree(
-//              images.get("A"),
-//              images.get("B"),
-//              images.get("C"),
-//              abstractionLevels[abstraction]
-//          )
-//      );
-//      horizontalRelations2.addAll(
-//          getMutualFractalsThreeByThree(
-//              images.get("D"),
-//              images.get("E"),
-//              images.get("F"),
-//              abstractionLevels[abstraction]
-//          )
-//      );
-//      // Get vertical relationships
-//      verticalRelations1.addAll(
-//          getMutualFractalsThreeByThree(
-//              images.get("A"),
-//              images.get("D"),
-//              images.get("G"),
-//              abstractionLevels[abstraction]
-//          )
-//      );
-//      verticalRelations2.addAll(
-//          getMutualFractalsThreeByThree(
-//              images.get("B"),
-//              images.get("E"),
-//              images.get("H"),
-//              abstractionLevels[abstraction]
-//          )
-//      );
       
       // Get the fractal representations for each horizontal relationship simultaneously
       MutualFractalsCommand horizontalFractalsCommand1 = new MutualFractalsCommand(
@@ -422,26 +386,6 @@ public class Agent {
           Set<FractalRepresentation> answerVertical = new HashSet<>();
           // Similarity vector
           double[] vector = new double[4];
-
-          // TODO remove when parallelism working
-//          // Get horizontal relationships
-//          answerHorizontal.addAll(
-//              getMutualFractalsThreeByThree(
-//                  images.get("G"),
-//                  images.get("H"),
-//                  images.get(figure.getKey()),
-//                  abstractionLevels[abstraction]
-//              )
-//          );
-//          // Get vertical relationships
-//          answerVertical.addAll(
-//              getMutualFractalsThreeByThree(
-//                  images.get("C"),
-//                  images.get("F"),
-//                  images.get(figure.getKey()),
-//                  abstractionLevels[abstraction]
-//              )
-//          );
           
           // Get the fractal representations for each relationship simultaneously
           MutualFractalsCommand answerHorizontalCommand1 = new MutualFractalsCommand(
@@ -779,8 +723,8 @@ public class Agent {
   /**
    * This method returns the color contraction for two images.
    *
-   * @param a
-   * @param b
+   * @param pixelMatrixA
+   * @param pixelMatrixB
    * @return
    */
   public double getColorContraction(int[][] pixelMatrixA, int[][] pixelMatrixB) {
@@ -793,7 +737,7 @@ public class Agent {
    *
    * http://stackoverflow.com/questions/12408431/how-can-i-get-the-average-colour-of-an-image
    *
-   * @param image
+   * @param pixelMatrix
    * @return
    */
   public int getColorMean(int[][] pixelMatrix) {
@@ -827,8 +771,8 @@ public class Agent {
   /**
    * This method returns the correspondence between two images.
    *
-   * @param a
-   * @param b
+   * @param pixelMatrixA
+   * @param pixelMatrixB
    * @param aFragmentOrigin
    * @param bFragmentOrigin
    * @return
@@ -844,8 +788,8 @@ public class Agent {
   /**
    * This method returns the photometric correspondence between two images.
    *
-   * @param a
-   * @param b
+   * @param pixelMatrixA
+   * @param pixelMatrixB
    * @return
    */
   public double getPhotometricCorrespondence(int[][] pixelMatrixA, int[][] pixelMatrixB) {
